@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>星轨番剧 · 二次元动漫站</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #1a1033;
+    --bg-2: #120a26;
+    --pink: #ff4d9d;
+    --blue: #4dd0ff;
+    --green: #9dff4d;
+    --purple: #8b5cf6;
+    --text: #f1ecff;
+    --muted: #b3a7d6;
+    --glass: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --font-title: "ZCOOL KuaiLe", "站酷快乐体", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .wrap { position: relative; z-index: 1; }
+  a { color: inherit; text-decoration: none; }
+  .neon-text {
+    background: linear-gradient(90deg, var(--pink), var(--blue), var(--green));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 28px;
+    background: rgba(18, 10, 38, 0.7);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .logo { font-family: var(--font-title); font-size: 24px; letter-spacing: 1px; }
+  .nav-links { display: flex; gap: 22px; margin-left: 10px; flex: 1; }
+  .nav-links a { color: var(--muted); font-size: 15px; transition: color .25s, text-shadow .25s; }
+  .nav-links a:hover { color: var(--text); text-shadow: 0 0 12px var(--blue); }
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 999px; padding: 7px 14px; min-width: 180px;
+  }
+  .search input { background: transparent; border: none; outline: none; color: var(--text); width: 100%; font-size: 14px; }
+  .search input::placeholder { color: var(--muted); }
+  .btn {
+    border: none; cursor: pointer; font-family: var(--font-body); font-weight: 600;
+    border-radius: 999px; padding: 9px 20px; font-size: 14px; color: #fff;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    box-shadow: 0 0 18px rgba(255, 77, 157, 0.5); transition: transform .2s, box-shadow .2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(255, 77, 157, 0.8); }
+  .btn-ghost { background: transparent; border: 1px solid var(--glass-border); box-shadow: none; color: var(--text); }
+
+  /* ---------- HERO ---------- */
+  header.hero { position: relative; min-height: 86vh; display: flex; align-items: center; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; }
+  .slide {
+    position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease;
+    display: flex; align-items: flex-end;
+  }
+  .slide.active { opacity: 1; }
+  .slide .cover {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transform: scale(1.05); transition: transform 6s ease;
+  }
+  .slide.active .cover { transform: scale(1.15); }
+  .slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,10,38,.25), rgba(18,10,38,.92)); }
+  .hero-content { position: relative; z-index: 2; padding: 0 8% 9%; max-width: 760px; }
+  .hero-tag { display: inline-block; font-size: 13px; letter-spacing: 2px; color: var(--green); margin-bottom: 14px; text-shadow: 0 0 10px var(--green); }
+  .hero-content h1 { font-family: var(--font-title); font-size: clamp(34px, 6vw, 64px); line-height: 1.15; margin-bottom: 16px; }
+  .hero-content p { color: var(--muted); font-size: 17px; max-width: 540px; margin-bottom: 28px; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .dots { position: absolute; bottom: 26px; left: 8%; z-index: 3; display: flex; gap: 10px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--glass-border); cursor: pointer; transition: all .3s; }
+  .dot.active { background: var(--pink); box-shadow: 0 0 12px var(--pink); width: 26px; border-radius: 6px; }
+
+  /* ---------- SECTIONS ---------- */
+  section { padding: 80px 8% 40px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 34px; flex-wrap: wrap; }
+  .sec-head h2 { font-family: var(--font-title); font-size: clamp(26px, 4vw, 40px); }
+  .sec-head .line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--glass-border), transparent); }
+
+  /* glass card base */
+  .card {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 18px; backdrop-filter: blur(10px); overflow: hidden;
+    transition: transform .3s, box-shadow .3s, border-color .3s;
+  }
+
+  /* popular grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px; }
+  .anime-card { cursor: pointer; }
+  .anime-card:hover { transform: translateY(-8px); border-color: var(--blue); box-shadow: 0 0 30px rgba(77, 208, 255, 0.45); }
+  .anime-cover { height: 260px; position: relative; display: flex; align-items: flex-end; padding: 14px; }
+  .anime-cover .ttl { font-family: var(--font-title); font-size: 19px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); z-index: 2; }
+  .anime-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.55)); }
+  .status { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+  .status.airing { background: rgba(157,255,77,.18); color: var(--green); border: 1px solid var(--green); }
+  .status.done { background: rgba(139,92,246,.2); color: #c4b5fd; border: 1px solid var(--purple); }
+  .anime-meta { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; font-size: 13px; color: var(--muted); }
+  .score { color: var(--pink); font-weight: 700; }
+
+  /* schedule */
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  .day { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px 10px; min-height: 220px; }
+  .day.today { border-color: var(--pink); box-shadow: 0 0 24px rgba(255,77,157,.4); background: rgba(255,77,157,.07); }
+  .day h3 { font-family: var(--font-title); text-align: center; font-size: 18px; margin-bottom: 12px; }
+  .day.today h3 { color: var(--pink); }
+  .day .item { font-size: 13px; padding: 7px 8px; margin-bottom: 7px; border-radius: 10px; background: rgba(255,255,255,.05); border-left: 3px solid var(--blue); }
+  .day .item .tm { color: var(--blue); font-size: 11px; }
+
+  /* news */
+  .news-list { display: flex; flex-direction: column; gap: 16px; }
+  .news-item { display: flex; gap: 18px; padding: 16px; align-items: center; }
+  .news-thumb { width: 120px; height: 80px; border-radius: 12px; flex-shrink: 0; }
+  .news-item .meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: flex; gap: 10px; }
+  .tag { padding: 2px 9px; border-radius: 999px; background: rgba(77,208,255,.15); color: var(--blue); }
+  .news-item h4 { font-size: 17px; margin-bottom: 6px; }
+  .news-item p { font-size: 13px; color: var(--muted); }
+
+  /* characters */
+  .chars { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 24px; }
+  .char { text-align: center; cursor: pointer; }
+  .char .av { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 12px; border: 2px solid var(--glass-border); transition: all .3s; }
+  .char:hover .av { border-color: var(--green); box-shadow: 0 0 26px rgba(157,255,77,.5); transform: scale(1.06); }
+  .char .nm { font-family: var(--font-title); font-size: 16px; }
+  .char .wk { font-size: 12px; color: var(--muted); }
+
+  /* community */
+  .posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .post { padding: 18px; }
+  .post h4 { font-size: 16px; margin-bottom: 8px; }
+  .post p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .post .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .post .foot .like { color: var(--pink); }
+
+  /* footer */
+  footer { padding: 50px 8% 30px; border-top: 1px solid var(--glass-border); margin-top: 40px; color: var(--muted); font-size: 13px; }
+  .foot-grid { display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 26px; }
+  .foot-grid h5 { font-family: var(--font-title); color: var(--text); margin-bottom: 12px; font-size: 16px; }
+  .foot-grid a { display: block; margin-bottom: 8px; transition: color .2s; }
+  .foot-grid a:hover { color: var(--blue); }
+  .copy { text-align: center; opacity: .7; }
+
+  /* reveal animation */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.show { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    .week { grid-template-columns: repeat(2, 1fr); }
+    .news-item .news-thumb { width: 90px; height: 64px; }
+    section { padding: 60px 5% 30px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="wrap">
+  <!-- NAV -->
+  <nav>
+    <div class="logo neon-text">星轨番剧</div>
+    <div class="nav-links">
+      <a href="#anime">番剧</a>
+      <a href="#news">资讯</a>
+      <a href="#chars">角色</a>
+      <a href="#community">社区</a>
+      <a href="#">我的</a>
+    </div>
+    <div class="search">
+      <span>🔍</span>
+      <input id="searchInput" type="text" placeholder="搜索番剧…" />
+    </div>
+    <button class="btn-ghost btn" onclick="alert('登录功能为前端演示，敬请期待～')">登录</button>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg" id="heroSlides"></div>
+    <div class="hero-content">
+      <span class="hero-tag">★ 本周新番已更新 ★</span>
+      <h1 id="heroTitle" class="neon-text">追番，从这一刻开始</h1>
+      <p id="heroDesc">汇聚全网热门番剧资讯、更新时间表与同好社区，一个站点看遍二次元。</p>
+      <div class="hero-actions">
+        <button class="btn" onclick="document.getElementById('anime').scrollIntoView()">开始看番</button>
+        <button class="btn-ghost btn" onclick="document.getElementById('schedule').scrollIntoView()">查看时间表</button>
+      </div>
+    </div>
+    <div class="dots" id="heroDots"></div>
+  </header>
+
+  <!-- POPULAR -->
+  <section id="anime">
+    <div class="sec-head"><h2>🔥 热门番剧</h2><div class="line"></div></div>
+    <div class="grid" id="animeGrid"></div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="schedule">
+    <div class="sec-head"><h2>📅 新番时间表</h2><div class="line"></div></div>
+    <div class="week" id="weekTable"></div>
+  </section>
+
+  <!-- NEWS -->
+  <section id="news">
+    <div class="sec-head"><h2>📰 动漫资讯</h2><div class="line"></div></div>
+    <div class="news-list" id="newsList"></div>
+  </section>
+
+  <!-- CHARACTERS -->
+  <section id="chars">
+    <div class="sec-head"><h2>✨ 人气角色</h2><div class="line"></div></div>
+    <div class="chars" id="charWall"></div>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section id="community">
+    <div class="sec-head"><h2>💬 同好社区</h2><div class="line"></div></div>
+    <div class="posts" id="postList"></div>
+    <div style="margin-top:24px;text-align:center;">
+      <button class="btn-ghost btn" onclick="alert('发帖功能为前端演示～')">＋ 发布帖子</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-grid">
+      <div><h5>星轨番剧</h5><a href="#anime">热门番剧</a><a href="#schedule">新番时间表</a><a href="#news">动漫资讯</a></div>
+      <div><h5>友情链接</h5><a href="#">哔哩哔哩</a><a href="#">Anime 官网</a><a href="#">漫画平台</a></div>
+      <div><h5>关注我们</h5><a href="#">微博</a><a href="#">微信公众号</a><a href="#">Discord</a></div>
+      <div><h5>关于</h5><a href="#">联系我们</a><a href="#">用户协议</a><a href="#">隐私政策</a></div>
+    </div>
+    <div class="copy">© 2026 星轨番剧 · 二次元综合站点 · 京ICP备00000000号（占位）</div>
+  </footer>
+</div>
+
+<script>
+/* ============ MOCK DATA ============ */
+const grad = (a, b) => `linear-gradient(135deg, ${a}, ${b})`;
+const animeList = [
+  { t: "咒术回战 怀玉", cover: grad('#ff4d9d', '#8b5cf6'), score: 9.2, status: "airing", fans: "128万", desc: "最强咒术师少年成长篇" },
+  { t: "葬送的芙莉莲", cover: grad('#4dd0ff', '#1a1033'), score: 9.5, status: "done", fans: "96万", desc: "魔法使的旅途与告别" },
+  { t: "鬼灭之刃 柱训练", cover: grad('#9dff4d', '#1a1033'), score: 8.9, status: "airing", fans: "210万", desc: "无限城决战前夜" },
+  { t: "间谍过家家", cover: grad('#ffd24d', '#ff4d9d'), score: 9.0, status: "airing", fans: "175万", desc: "伪装家庭的温馨日常" },
+  { t: "葬送的芙莉莲 第二季", cover: grad('#8b5cf6', '#4dd0ff'), score: 9.3, status: "done", fans: "88万", desc: "旅程的延续" },
+  { t: "链锯人", cover: grad('#ff4d4d', '#1a1033'), score: 8.7, status: "done", fans: "240万", desc: "恶魔猎人的血色物语" },
+  { t: "孤独摇滚", cover: grad('#4dd0ff', '#9dff4d'), score: 9.1, status: "done", fans: "112万", desc: "少女乐队的青春" },
+  { t: "咒术回战 涩谷事变", cover: grad('#8b5cf6', '#ff4d9d'), score: 9.4, status: "airing", fans: "156万", desc: "涩谷篇高潮" },
+];
+const heroSlides = [
+  { t: "咒术回战 怀玉篇", d: "最强咒术师的前传，宿命与羁绊的交锋。", c: grad('#ff4d9d', '#8b5cf6') },
+  { t: "葬送的芙莉莲", d: "一段关于「告别」的魔法旅程，豆瓣 9.5。", c: grad('#4dd0ff', '#1a1033') },
+  { t: "鬼灭之刃 柱训练篇", d: "无限城决战前的最后特训，燃爆今夏。", c: grad('#9dff4d', '#1a1033') },
+];
+const weekData = {
+  "周一": [{ tm: "23:00", n: "间谍过家家" }, { tm: "24:00", n: "孤独摇滚" }],
+  "周二": [{ tm: "22:30", n: "葬送的芙莉莲" }],
+  "周三": [{ tm: "23:30", n: "咒术回战" }, { tm: "25:00", n: "链锯人" }],
+  "周四": [{ tm: "22:00", n: "鬼灭之刃" }],
+  "周五": [{ tm: "23:00", n: "咒术回战 怀玉" }],
+  "周六": [{ tm: "17:00", n: "哆啦A梦" }, { tm: "24:30", n: "葬送的芙莉莲 二" }],
+  "周日": [{ tm: "22:00", n: "鬼灭之刃 柱训练" }, { tm: "23:30", n: "孤独摇滚 SP" }],
+};
+const newsList = [
+  { t: "《葬送的芙莉莲》斩获年度动画大奖", d: "在最新一届动画评选中，芙莉莲以细腻演出拿下最佳作品。", tag: "业界", date: "09-12", c: grad('#4dd0ff', '#8b5cf6') },
+  { t: "《咒术回战》怀玉篇定档，官方放出预告", d: "五条悟与学生时代的群像故事即将开播，PV 已破百万播放。", tag: "新番", date: "09-11", c: grad('#ff4d9d', '#1a1033') },
+  { t: "《鬼灭之刃》柱训练篇收视创新高", d: "首播即登顶同时段榜首，炭治郎一行特训引发热议。", tag: "速报", date: "09-10", c: grad('#9dff4d', '#1a1033') },
+  { t: "制作委员会公布秋季番剧 lineup", d: "超 30 部新番将在十月陆续上线，覆盖奇幻、日常、战斗。", tag: "情报", date: "09-09", c: grad('#8b5cf6', '#4dd0ff') },
+];
+const charList = [
+  { n: "五条悟", w: "咒术回战", c: grad('#4dd0ff', '#1a1033') },
+  { n: "芙莉莲", w: "葬送的芙莉莲", c: grad('#9dff4d', '#1a1033') },
+  { n: "炭治郎", w: "鬼灭之刃", c: grad('#ff4d4d', '#1a1033') },
+  { n: "阿尼亚", w: "间谍过家家", c: grad('#ffd24d', '#ff4d9d') },
+  { n: "电次", w: "链锯人", c: grad('#ff4d9d', '#1a1033') },
+  { n: "虹夏", w: "孤独摇滚", c: grad('#8b5cf6', '#4dd0ff') },
+  { n: "虎杖悠仁", w: "咒术回战", c: grad('#ff4d9d', '#8b5cf6') },
+  { n: "祢豆子", w: "鬼灭之刃", c: grad('#9dff4d', '#ff4d9d') },
+];
+const postList = [
+  { t: "怀玉篇第 3 集封神，这段运镜绝了", d: "谁懂啊，五条悟出场那段的调度，直接起鸡皮疙瘩……", like: "2.3k", cmt: "412" },
+  { t: "芙莉莲到底讲了什么？聊聊「告别」", d: "看完最大的感受不是热血，而是平静的温柔。", like: "1.8k", cmt: "356" },
+  { t: "入坑鬼灭顺序求推荐！", d: "纯新人，要不要从柱训练篇开始看？求大佬指点。", like: "904", cmt: "221" },
+  { t: "孤独摇滚后劲太大了，求同款乐队番", d: "看完疯狂想学吉他，有没有类似的音乐番推荐？", like: "1.1k", cmt: "289" },
+];
+
+/* ============ RENDER ============ */
+function renderAnime(list) {
+  document.getElementById('animeGrid').innerHTML = list.map(a => `
+    <div class="card anime-card">
+      <div class="anime-cover" style="background:${a.cover}">
+        <span class="status ${a.status}">${a.status === 'airing' ? '更新中' : '已完结'}</span>
+        <div class="ttl">${a.t}</div>
+      </div>
+      <div class="anime-meta"><span>${a.desc}</span><span class="score">★ ${a.score}</span></div>
+      <div class="anime-meta" style="padding-top:0;color:var(--muted)">👥 ${a.fans} 人在追</div>
+    </div>`).join('');
+}
+renderAnime(animeList);
+
+// hero carousel
+const hs = document.getElementById('heroSlides'), hd = document.getElementById('heroDots');
+heroSlides.forEach((s, i) => {
+  const d = document.createElement('div'); d.className = 'slide' + (i === 0 ? ' active' : '');
+  d.innerHTML = `<div class="cover" style="background:${s.c}"></div>`;
+  hs.appendChild(d);
+  const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goSlide(i); hd.appendChild(dot);
+});
+let cur = 0;
+function goSlide(i) {
+  cur = i;
+  document.querySelectorAll('.slide').forEach((s, k) => s.classList.toggle('active', k === i));
+  document.querySelectorAll('.dot').forEach((s, k) => s.classList.toggle('active', k === i));
+}
+setInterval(() => goSlide((cur + 1) % heroSlides.length), 4500);
+
+// schedule
+const days = ["周一","周二","周三","周四","周五","周六","周日"];
+const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0
+document.getElementById('weekTable').innerHTML = days.map((dn, i) => `
+  <div class="day ${i === todayIdx ? 'today' : ''}">
+    <h3>${dn}${i === todayIdx ? ' · 今' : ''}</h3>
+    ${(weekData[dn] || []).map(x => `<div class="item"><div class="tm">${x.tm}</div>${x.n}</div>`).join('') || '<div class="item" style="opacity:.4">暂无</div>'}
+  </div>`).join('');
+
+// news
+document.getElementById('newsList').innerHTML = newsList.map(n => `
+  <div class="card news-item">
+    <div class="news-thumb" style="background:${n.c}"></div>
+    <div>
+      <div class="meta"><span class="tag">${n.tag}</span><span>📅 ${n.date}</span></div>
+      <h4>${n.t}</h4><p>${n.d}</p>
+    </div>
+  </div>`).join('');
+
+// characters
+document.getElementById('charWall').innerHTML = charList.map(c => `
+  <div class="char"><div class="av" style="background:${c.c}"></div><div class="nm">${c.n}</div><div class="wk">${c.w}</div></div>`).join('');
+
+// community
+document.getElementById('postList').innerHTML = postList.map(p => `
+  <div class="card post">
+    <h4>${p.t}</h4><p>${p.d}</p>
+    <div class="foot"><span class="like">♥ ${p.like}</span><span>💬 ${p.cmt}</span></div>
+  </div>`).join('');
+
+// search filter
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.trim();
+  renderAnime(animeList.filter(a => a.t.includes(q) || a.desc.includes(q)));
+});
+
+/* ============ SCROLL REVEAL ============ */
+document.querySelectorAll('section').forEach(s => s.classList.add('reveal'));
+const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) en.target.classList.add('show'); }), { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(s => io.observe(s));
+
+/* ============ STARFIELD ============ */
+const cv = document.getElementById('stars'), ctx = cv.getContext('2d');
+let W, H, stars;
+function init() {
+  W = cv.width = innerWidth; H = cv.height = innerHeight;
+  stars = Array.from({ length: 140 }, () => ({
+    x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + .3,
+    a: Math.random(), s: Math.random() * .02 + .005,
+    c: ['#ff4d9d', '#4dd0ff', '#9dff4d', '#ffffff'][Math.floor(Math.random() * 4)]
+  }));
+}
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(st => {
+    st.a += st.s; const o = (Math.sin(st.a) + 1) / 2;
+    ctx.globalAlpha = .25 + o * .75; ctx.fillStyle = st.c;
+    ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fill();
+    st.y += .25; if (st.y > H) { st.y = 0; st.x = Math.random() * W; }
+  });
+  requestAnimationFrame(draw);
+}
+init(); draw(); addEventListener('resize', init);
+</script>
+</body>
+</html>
