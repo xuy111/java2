@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>蜡笔小新 · 登录乐园</title>
+<style>
+  /* ===== 蜡笔小新配色 ===== */
+  :root {
+    --cream:   #FFF6DD;   /* 奶油黄背景 */
+    --paper:   #FFFBF0;   /* 卡片纸 */
+    --ink:     #2B2B2B;   /* 蜡笔黑描边 */
+    --red:     #FF5A5A;   /* 小新红衬衫 */
+    --yellow:  #FFD23F;   /* 小新黄 */
+    --blue:    #5EC8F2;   /* 风间蓝 */
+    --green:   #7BD389;   /* 正男绿 */
+    --pink:    #FF9EC4;   /* 妮妮粉 */
+    --shadow:  rgba(43,43,43,.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    font-family: "Comic Sans MS", "STKaiti", "KaiTi", "楷体", "PingFang SC", "Microsoft YaHei", cursive;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255,210,63,.35) 0 12px, transparent 13px),
+      radial-gradient(circle at 86% 10%, rgba(94,200,242,.30) 0 10px, transparent 11px),
+      radial-gradient(circle at 78% 82%, rgba(255,158,196,.30) 0 14px, transparent 15px),
+      radial-gradient(circle at 22% 88%, rgba(123,211,137,.30) 0 11px, transparent 12px),
+      var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 100%;
+  }
+
+  /* 蜡笔涂鸦纹理覆盖层 */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: .06;
+    background-image:
+      repeating-linear-gradient(45deg, var(--ink) 0 2px, transparent 2px 9px),
+      repeating-linear-gradient(-45deg, var(--ink) 0 2px, transparent 2px 11px);
+  }
+
+  /* ===== 歪歪扭扭的手绘卡片 ===== */
+  .card {
+    position: relative;
+    width: min(420px, 100%);
+    background: var(--paper);
+    padding: 26px 28px 30px;
+    border: 4px solid var(--ink);
+    border-radius: 26px 18px 30px 16px / 18px 28px 16px 30px;
+    box-shadow: 7px 9px 0 var(--shadow);
+    z-index: 1;
+  }
+  /* 手绘描边抖动 SVG 滤镜 */
+  .card { filter: url(#wobble); }
+
+  /* 顶部小新头像 + 标题 */
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .head svg { width: 64px; height: 64px; flex: none; }
+  .head h1 {
+    font-size: 24px;
+    margin: 0;
+    line-height: 1.15;
+    transform: rotate(-1.5deg);
+  }
+  .head h1 small {
+    display: block;
+    font-size: 13px;
+    font-weight: normal;
+    opacity: .7;
+    margin-top: 2px;
+  }
+
+  /* 切换标签 */
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin: 16px 0 18px;
+  }
+  .tab {
+    flex: 1;
+    border: 3px solid var(--ink);
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    padding: 9px 0;
+    cursor: pointer;
+    border-radius: 14px 10px 16px 9px / 9px 15px 8px 16px;
+    transform: rotate(-.6deg);
+    transition: transform .12s, background .12s;
+  }
+  .tab:nth-child(2) { transform: rotate(.8deg); }
+  .tab.active { background: var(--yellow); transform: rotate(0) translateY(-2px); box-shadow: 3px 4px 0 var(--shadow); }
+  .tab:active { transform: translateY(1px) rotate(0); }
+
+  /* 表单 */
+  .form { display: none; }
+  .form.active { display: block; animation: pop .25s ease; }
+  @keyframes pop { from { transform: scale(.96); opacity: .3 } to { transform: scale(1); opacity: 1 } }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    transform: rotate(-.5deg);
+  }
+  .field input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 16px;
+    padding: 11px 13px;
+    border: 3px solid var(--ink);
+    border-radius: 13px 9px 14px 8px / 8px 14px 9px 13px;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+  }
+  .field input:focus { background: #FFFDF2; box-shadow: 3px 3px 0 var(--shadow); }
+  .field input.bad { border-color: var(--red); background: #FFEFEF; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 16px; }
+  .remember { font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .remember input { width: 16px; height: 16px; }
+  .link { font-size: 13px; color: var(--blue); cursor: pointer; text-decoration: underline; }
+
+  .btn {
+    width: 100%;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 13px 0;
+    border: 4px solid var(--ink);
+    border-radius: 16px 11px 18px 10px / 10px 18px 11px 16px;
+    color: #fff;
+    background: var(--red);
+    cursor: pointer;
+    box-shadow: 4px 5px 0 var(--shadow);
+    transition: transform .1s;
+  }
+  .btn.register { background: var(--green); }
+  .btn:active { transform: translate(4px,5px); box-shadow: 0 0 0 var(--shadow); }
+
+  .hint { font-size: 12.5px; min-height: 18px; margin: 0 0 12px; color: var(--red); transform: rotate(-.4deg); }
+  .hint.ok { color: var(--green); }
+
+  .foot { text-align: center; font-size: 12px; opacity: .65; margin-top: 14px; }
+
+  /* 登录成功后的欢迎条 */
+  .welcome {
+    display: none;
+    text-align: center;
+    padding: 8px 0 4px;
+  }
+  .welcome.show { display: block; }
+  .welcome p { font-size: 17px; margin: 6px 0 14px; }
+</style>
+</head>
+<body>
+
+<!-- 手绘抖动滤镜 -->
+<svg width="0" height="0" style="position:absolute">
+  <filter id="wobble">
+    <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+  </filter>
+</svg>
+
+<div class="card">
+  <div class="head">
+    <!-- 简笔小新头像 -->
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="52" r="34" fill="#FFE3C4" stroke="#2B2B2B" stroke-width="3.5"/>
+      <!-- 头发两撮 -->
+      <path d="M38 22 q-4 -12 4 -14 q3 6 1 14 z" fill="#2B2B2B"/>
+      <path d="M62 22 q4 -12 -4 -14 q-3 6 -1 14 z" fill="#2B2B2B"/>
+      <!-- 眉毛 -->
+      <path d="M34 46 l12 -3" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M66 46 l-12 -3" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 眼睛 -->
+      <circle cx="40" cy="54" r="4" fill="#2B2B2B"/>
+      <circle cx="60" cy="54" r="4" fill="#2B2B2B"/>
+      <!-- 脸颊线 -->
+      <path d="M30 62 l5 2 M30 66 l5 1" stroke="#2B2B2B" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M70 62 l-5 2 M70 66 l-5 1" stroke="#2B2B2B" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- 嘴巴 -->
+      <path d="M42 66 q8 8 16 0" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <h1>蜡笔小新<br>登录乐园<small>～动感光波哔哔哔～</small></h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="switchTab('login')">我要登录</button>
+    <button class="tab" id="tabReg" onclick="switchTab('reg')">我要注册</button>
+  </div>
+
+  <!-- 登录表单 -->
+  <form class="form active" id="loginForm" onsubmit="return doLogin(event)">
+    <div class="field">
+      <label>昵称 / 用户名</label>
+      <input id="luser" type="text" placeholder="野原新之助" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <input id="lpass" type="password" placeholder="••••••" autocomplete="current-password" />
+    </div>
+    <div class="row">
+      <label class="remember"><input id="lrem" type="checkbox" /> 记住我（下次直接进）</label>
+      <span class="link" onclick="forgot()">忘记密码？</span>
+    </div>
+    <p class="hint" id="lhint"></p>
+    <button class="btn" type="submit">登 录 啦！</button>
+  </form>
+
+  <!-- 注册表单 -->
+  <form class="form" id="regForm" onsubmit="return doRegister(event)">
+    <div class="field">
+      <label>取个昵称（4-20字）</label>
+      <input id="ruser" type="text" placeholder="比如：风间彻" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>邮箱（选填）</label>
+      <input id="remail" type="email" placeholder="shinchan@mail.com" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>密码（至少6位）</label>
+      <input id="rpass" type="password" placeholder="••••••" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label>再输一次密码</label>
+      <input id="rpass2" type="password" placeholder="••••••" autocomplete="new-password" />
+    </div>
+    <p class="hint" id="rhint"></p>
+    <button class="btn register" type="submit">注 册 加 入！</button>
+  </form>
+
+  <!-- 欢迎态 -->
+  <div class="welcome" id="welcome">
+    <svg viewBox="0 0 100 100" width="56" height="56" aria-hidden="true">
+      <circle cx="50" cy="52" r="34" fill="#FFE3C4" stroke="#2B2B2B" stroke-width="3.5"/>
+      <path d="M38 22 q-4 -12 4 -14 q3 6 1 14 z" fill="#2B2B2B"/>
+      <path d="M62 22 q4 -12 -4 -14 q-3 6 -1 14 z" fill="#2B2B2B"/>
+      <circle cx="40" cy="54" r="4" fill="#2B2B2B"/>
+      <circle cx="60" cy="54" r="4" fill="#2B2B2B"/>
+      <path d="M40 66 q10 10 20 0" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <p id="welcomeText">欢迎回来！</p>
+    <button class="btn" style="background:var(--blue)" onclick="logout()">退 出 登 录</button>
+  </div>
+
+  <div class="foot">本页纯前端演示 · 账号只存在你自己的浏览器里</div>
+</div>
+
+<script>
+  const DB_KEY = 'shinchan_users';
+  const SESSION_KEY = 'shinchan_session';
+
+  // 默认内置演示账号
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function setUsers(u) { localStorage.setItem(DB_KEY, JSON.stringify(u)); }
+  (function seed() {
+    const u = getUsers();
+    if (!u['shinchan']) u['shinchan'] = { pass: '123456', email: '' };
+    setUsers(u);
+  })();
+
+  function switchTab(t) {
+    const login = t === 'login';
+    document.getElementById('loginForm').classList.toggle('active', login);
+    document.getElementById('regForm').classList.toggle('active', !login);
+    document.getElementById('tabLogin').classList.toggle('active', login);
+    document.getElementById('tabReg').classList.toggle('active', !login);
+    clearHints();
+  }
+  function clearHints() {
+    document.getElementById('lhint').textContent = '';
+    document.getElementById('rhint').textContent = '';
+    ['luser','lpass','ruser','rpass','rpass2'].forEach(id => document.getElementById(id).classList.remove('bad'));
+  }
+
+  function doLogin(e) {
+    e.preventDefault();
+    clearHints();
+    const user = document.getElementById('luser').value.trim();
+    const pass = document.getElementById('lpass').value;
+    const users = getUsers();
+    if (!user || !pass) {
+      setHint('lhint', '动感光波～名字和密码都要填啦！', ['luser','lpass']);
+      return false;
+    }
+    if (!users[user] || users[user].pass !== pass) {
+      setHint('lhint', '唔唔～用户名或密码不对哦，再想想？', ['luser','lpass']);
+      return false;
+    }
+    if (document.getElementById('lrem').checked) {
+      localStorage.setItem(SESSION_KEY, user);
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
+    showWelcome(user);
+    return false;
+  }
+
+  function doRegister(e) {
+    e.preventDefault();
+    clearHints();
+    const user = document.getElementById('ruser').value.trim();
+    const email = document.getElementById('remail').value.trim();
+    const pass = document.getElementById('rpass').value;
+    const pass2 = document.getElementById('rpass2').value;
+    const users = getUsers();
+
+    if (user.length < 4 || user.length > 20) {
+      setHint('rhint', '昵称要 4 到 20 个字啦～', ['ruser']); return false;
+    }
+    if (users[user]) {
+      setHint('rhint', '这个昵称被抢注啦！换个呗～', ['ruser']); return false;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setHint('rhint', '邮箱格式好像不太对哦～', ['remail']); return false;
+    }
+    if (pass.length < 6) {
+      setHint('rhint', '密码至少 6 位，保护小新！', ['rpass']); return false;
+    }
+    if (pass !== pass2) {
+      setHint('rhint', '两次密码不一样捏，再检查下～', ['rpass','rpass2']); return false;
+    }
+
+    users[user] = { pass, email };
+    setUsers(users);
+    localStorage.setItem(SESSION_KEY, user);
+    showWelcome(user, true);
+    return false;
+  }
+
+  function setHint(id, msg, badIds) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.remove('ok');
+    (badIds || []).forEach(bid => document.getElementById(bid).classList.add('bad'));
+  }
+
+  function showWelcome(user, justReg) {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('regForm').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'none';
+    const w = document.getElementById('welcome');
+    w.classList.add('show');
+    document.getElementById('welcomeText').textContent =
+      (justReg ? '注册成功！欢迎加入蜡笔小新乐园，' : '欢迎回来，') + user + '！';
+  }
+
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
+  function forgot() {
+    const el = document.getElementById('lhint');
+    el.classList.add('ok');
+    el.textContent = '演示账号：shinchan / 123456，快去试试～';
+  }
+
+  // 已登录则直接进入欢迎页
+  (function restore() {
+    const s = localStorage.getItem(SESSION_KEY);
+    if (s) showWelcome(s);
+  })();
+</script>
+</body>
+</html>
