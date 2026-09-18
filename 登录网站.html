@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · Login</title>
+<style>
+  :root{
+    --brand:#4f6ef7; --brand2:#7b5cff;
+    --bg1:#eef2ff; --bg2:#e7f0ff;
+    --text:#1f2430; --muted:#8a92a6; --line:#e3e8f0;
+    --danger:#e5484d; --ok:#2bb673;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  html,body{height:100%;}
+  body{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);padding:20px;}
+  .card{width:100%;max-width:400px;background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(79,110,247,.18);overflow:hidden;}
+  .head{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;padding:30px 30px 22px;text-align:center;position:relative;}
+  .logo{width:54px;height:54px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px;}
+  .head h1{font-size:21px;font-weight:700;letter-spacing:.5px;}
+  .head p{margin-top:6px;font-size:13px;opacity:.85;}
+  .tabs{display:flex;gap:8px;padding:16px 30px 0;}
+  .tab{flex:1;text-align:center;padding:10px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:10px 10px 0 0;transition:.2s;}
+  .tab.active{color:var(--brand);background:#f6f8ff;position:relative;}
+  .tab.active::after{content:"";position:absolute;left:25%;right:25%;bottom:-1px;height:3px;background:var(--brand);border-radius:3px;}
+  .body{padding:18px 30px 30px;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .field{margin-bottom:14px;position:relative;}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px;font-weight:600;}
+  .input-wrap{position:relative;}
+  .input-wrap .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none;}
+  input[type=text],input[type=password],input[type=email]{
+    width:100%;padding:13px 14px 13px 40px;border:1px solid var(--line);border-radius:11px;font-size:14px;color:var(--text);background:#fbfcff;transition:.2s;
+  }
+  input:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(79,110,247,.12);}
+  .toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:13px;user-select:none;}
+  .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:13px;}
+  .row label{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer;}
+  .row a{color:var(--brand);text-decoration:none;font-weight:600;}
+  .row a:hover{text-decoration:underline;}
+  .btn{width:100%;padding:13px;border:none;border-radius:11px;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;transition:.2s;}
+  .btn:hover{filter:brightness(1.05);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{opacity:.7;cursor:not-allowed;transform:none;}
+  .err{color:var(--danger);font-size:12.5px;margin-top:6px;min-height:16px;display:none;}
+  .err.show{display:block;}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:#1f2430;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:99;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .hint{margin-top:16px;font-size:12px;color:var(--muted);text-align:center;background:#f6f8ff;border:1px dashed var(--line);border-radius:10px;padding:10px;}
+  .hint b{color:var(--brand);}
+  .welcome{display:none;padding:40px 30px;text-align:center;}
+  .welcome.show{display:block;}
+  .avatar{width:70px;height:70px;border-radius:50%;margin:0 auto 16px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;}
+  .welcome h2{font-size:20px;margin-bottom:8px;}
+  .welcome p{color:var(--muted);font-size:14px;margin-bottom:10px;}
+  .welcome .mail{font-size:13px;color:var(--brand);margin-bottom:22px;}
+  .logout{background:transparent;border:1px solid var(--line);color:var(--muted);padding:10px 22px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;}
+  .logout:hover{border-color:var(--danger);color:var(--danger);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <!-- 登录视图 -->
+    <div id="loginView">
+      <div class="head">
+        <div class="logo">🔐</div>
+        <h1>欢迎登录</h1>
+        <p>请输入您的账号信息</p>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="login">登录</div>
+        <div class="tab" data-tab="register">注册</div>
+      </div>
+      <div class="body">
+        <!-- 登录表单 -->
+        <form class="view active" id="loginForm" autocomplete="off" onsubmit="return false;">
+          <div class="field">
+            <label for="user">用户名</label>
+            <div class="input-wrap"><span class="ic">👤</span>
+              <input type="text" id="user" placeholder="请输入用户名"></div>
+            <div class="err" id="userErr"></div>
+          </div>
+          <div class="field">
+            <label for="pass">密码</label>
+            <div class="input-wrap"><span class="ic">🔒</span>
+              <input type="password" id="pass" placeholder="请输入密码">
+              <span class="toggle" id="toggleLogin">显示</span></div>
+            <div class="err" id="passErr"></div>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="remember"> 记住我</label>
+            <a href="#" onclick="forgot();return false;">忘记密码？</a>
+          </div>
+          <button class="btn" id="loginBtn">登 录</button>
+          <div class="hint">演示账号：<b>admin</b> / <b>123456</b><br>也可先在「注册」页建账号再登录</div>
+        </form>
+
+        <!-- 注册表单 -->
+        <form class="view" id="registerForm" autocomplete="off" onsubmit="return false;">
+          <div class="field">
+            <label for="regUser">用户名</label>
+            <div class="input-wrap"><span class="ic">👤</span>
+              <input type="text" id="regUser" placeholder="设置用户名（4-20位）"></div>
+            <div class="err" id="regUserErr"></div>
+          </div>
+          <div class="field">
+            <label for="regMail">邮箱（选填）</label>
+            <div class="input-wrap"><span class="ic">✉️</span>
+              <input type="email" id="regMail" placeholder="example@mail.com"></div>
+            <div class="err" id="regMailErr"></div>
+          </div>
+          <div class="field">
+            <label for="regPass">密码</label>
+            <div class="input-wrap"><span class="ic">🔒</span>
+              <input type="password" id="regPass" placeholder="设置密码（至少6位）">
+              <span class="toggle" id="toggleReg">显示</span></div>
+            <div class="err" id="regPassErr"></div>
+          </div>
+          <div class="field">
+            <label for="regPass2">确认密码</label>
+            <div class="input-wrap"><span class="ic">🔒</span>
+              <input type="password" id="regPass2" placeholder="再次输入密码"></div>
+            <div class="err" id="regPass2Err"></div>
+          </div>
+          <button class="btn" id="regBtn">注 册</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 欢迎页 -->
+    <div class="welcome" id="welcomeView">
+      <div class="avatar" id="avatar">👤</div>
+      <h2 id="welcomeName">欢迎回来！</h2>
+      <p id="welcomeSub">您已成功登录系统</p>
+      <div class="mail" id="welcomeMail"></div>
+      <button class="logout" onclick="logout()">退出登录</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const USERS_KEY = "auth_users";
+  const DEMO = {user:"admin", pass:"123456", mail:""};
+
+  function getUsers(){
+    try{ return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }catch(e){ return []; }
+  }
+  function saveUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
+  function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); }
+
+  // 初始化演示账号
+  (function(){
+    const users = getUsers();
+    if(!users.find(u=>u.user===DEMO.user)){ users.push(DEMO); saveUsers(users); }
+    const saved = localStorage.getItem("login_user");
+    if(saved){ $("user").value=saved; $("remember").checked=true; }
+  })();
+
+  // Tab 切换
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.onclick=()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      $(t.dataset.tab+"Form").classList.add("active");
+    };
+  });
+
+  // 密码显示切换
+  function bindToggle(btnId, inputId){
+    $(btnId).onclick=function(){ const i=$(inputId);
+      if(i.type==="password"){i.type="text";this.textContent="隐藏";}else{i.type="password";this.textContent="显示";} };
+  }
+  bindToggle("toggleLogin","pass"); bindToggle("toggleReg","regPass");
+  bindToggle("toggleLogin","regPass"); // 复用
+
+  function showErr(id,m){ const e=$(id); e.textContent=m; e.classList.add("show"); }
+  function clearErr(id){ const e=$(id); e.textContent=""; e.classList.remove("show"); }
+
+  // 登录
+  $("loginBtn").onclick=function(){
+    let ok=true; clearErr("userErr"); clearErr("passErr");
+    const u=$("user").value.trim(), p=$("pass").value;
+    if(!u){ showErr("userErr","请输入用户名"); ok=false; }
+    if(!p){ showErr("passErr","请输入密码"); ok=false; }
+    if(!ok) return;
+    const btn=this; btn.textContent="登录中..."; btn.disabled=true;
+    setTimeout(()=>{
+      const users=getUsers();
+      const found=users.find(x=>x.user===u && x.pass===p);
+      if(found || (u===DEMO.user && p===DEMO.pass)){
+        if($("remember").checked) localStorage.setItem("login_user",u);
+        else localStorage.removeItem("login_user");
+        localStorage.setItem("logged_in","1"); localStorage.setItem("login_name",u);
+        if(found) localStorage.setItem("login_mail",found.mail||"");
+        showWelcome(u, found?found.mail:"");
+      }else{ showErr("passErr","用户名或密码错误"); }
+      btn.textContent="登 录"; btn.disabled=false;
+    },500);
+  };
+  $("pass").addEventListener("keydown",e=>{ if(e.key==="Enter") $("loginBtn").click(); });
+
+  // 注册
+  $("regBtn").onclick=function(){
+    let ok=true;
+    ["regUserErr","regMailErr","regPassErr","regPass2Err"].forEach(clearErr);
+    const u=$("regUser").value.trim(), m=$("regMail").value.trim();
+    const p=$("regPass").value, p2=$("regPass2").value;
+    if(u.length<4){ showErr("regUserErr","用户名至少4位"); ok=false; }
+    if(m && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)){ showErr("regMailErr","邮箱格式不正确"); ok=false; }
+    if(p.length<6){ showErr("regPassErr","密码至少6位"); ok=false; }
+    if(p!==p2){ showErr("regPass2Err","两次密码不一致"); ok=false; }
+    if(!ok) return;
+    const users=getUsers();
+    if(users.find(x=>x.user===u)){ showErr("regUserErr","该用户名已被注册"); return; }
+    users.push({user:u, pass:p, mail:m}); saveUsers(users);
+    toast("注册成功，请登录");
+    document.querySelector('.tab[data-tab="login"]').click();
+    $("user").value=u; $("pass").value="";
+  };
+
+  function forgot(){
+    const u=$("user").value.trim();
+    if(u && getUsers().find(x=>x.user===u)) toast("演示：已向绑定邮箱发送重置链接");
+    else toast("演示站点：请联系管理员重置密码");
+  }
+
+  function showWelcome(name, mail){
+    $("loginView").style.display="none";
+    $("welcomeView").classList.add("show");
+    $("welcomeName").textContent="欢迎回来，"+name+"！";
+    $("avatar").textContent=(name.trim().charAt(0).toUpperCase())||"👤";
+    $("welcomeMail").textContent=mail?("📧 "+mail):"";
+  }
+  function logout(){
+    localStorage.removeItem("logged_in"); localStorage.removeItem("login_name"); localStorage.removeItem("login_mail");
+    $("welcomeView").classList.remove("show");
+    $("loginView").style.display="block";
+    $("pass").value=""; $("regPass").value=""; $("regPass2").value="";
+  }
+  if(localStorage.getItem("logged_in")){
+    showWelcome(localStorage.getItem("login_name")||"用户", localStorage.getItem("login_mail")||"");
+  }
+</script>
+</body>
+</html>
